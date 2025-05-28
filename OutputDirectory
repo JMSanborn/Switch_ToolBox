@@ -1,13 +1,14 @@
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
+# Font and UI scale settings
+$font = New-Object System.Drawing.Font("Segoe UI", 12)
+
+# Resolve script location and plink path
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $plinkPath = Join-Path $scriptDir "plink.exe"
 
-# Font settings
-$font = New-Object System.Drawing.Font("Segoe UI", 12)
-
-# Create Form
+# Create the Form
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "SSH Show Tech Tool"
 $form.Size = New-Object System.Drawing.Size(500, 450)
@@ -37,7 +38,7 @@ for ($i = 0; $i -lt $labels.Length; $i++) {
     $form.Controls.Add($textbox)
 }
 
-# Output Text Box
+# Output Status Box
 $outputBox = New-Object System.Windows.Forms.TextBox
 $outputBox.Location = New-Object System.Drawing.Point(20, 280)
 $outputBox.Size = New-Object System.Drawing.Size(430, 30)
@@ -53,7 +54,7 @@ $button.Location = New-Object System.Drawing.Point(150, 330)
 $button.Font = $font
 $form.Controls.Add($button)
 
-# Auto-fill Output File on IP change
+# Auto-fill Output File on IP entry
 $controls["Switch IP:"].Add_TextChanged({
     $ip = $controls["Switch IP:"].Text.Trim()
     if ($ip -match '^\d{1,3}(\.\d{1,3}){3}$') {
@@ -64,7 +65,7 @@ $controls["Switch IP:"].Add_TextChanged({
     }
 })
 
-# Button click event
+# Run Button Click Logic
 $button.Add_Click({
     $ip = $controls["Switch IP:"].Text.Trim()
     $user = $controls["Username:"].Text.Trim()
@@ -77,9 +78,8 @@ $button.Add_Click({
     }
 
     if (-not (Test-Path $plinkPath)) {
-    $outputBox.Text = "❌ plink.exe not found at $plinkPath"
-    return
-}
+        $outputBox.Text = "❌ plink.exe not found at $plinkPath"
+        return
     }
 
     $command = "terminal length 0 && show tech"
@@ -91,13 +91,14 @@ $button.Add_Click({
             New-Item -Path $outputDir -ItemType Directory | Out-Null
         }
 
-        # Run SSH command
+        # Run SSH command and save output
         & $plinkPath -ssh "$user@$ip" -pw $pass $command | Out-File -FilePath $outFile -Encoding utf8
         $outputBox.Text = "✅ Output saved to $outFile"
     } catch {
         $outputBox.Text = "❌ SSH failed or output could not be saved."
     }
+})
 
-# Show the form
+# Show the Form
 $form.Topmost = $true
 [void]$form.ShowDialog()
