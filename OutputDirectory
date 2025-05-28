@@ -1,6 +1,9 @@
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+$plinkPath = Join-Path $scriptDir "plink.exe"
+
 # Font settings
 $font = New-Object System.Drawing.Font("Segoe UI", 12)
 
@@ -73,10 +76,10 @@ $button.Add_Click({
         return
     }
 
-    $plinkPath = ".\plink.exe"
     if (-not (Test-Path $plinkPath)) {
-        $outputBox.Text = "❌ plink.exe not found!"
-        return
+    $outputBox.Text = "❌ plink.exe not found at $plinkPath"
+    return
+}
     }
 
     $command = "terminal length 0 && show tech"
