@@ -1,0 +1,5 @@
+# Ensure folder exists
+$outputDir = [System.IO.Path]::GetDirectoryName($outFile)
+if (-not (Test-Path $outputDir)) {
+    New-Item -Path $outputDir -ItemType Directory | Out-Null
+}
