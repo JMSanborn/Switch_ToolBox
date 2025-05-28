@@ -97,7 +97,6 @@ $button.Add_Click({
     } catch {
         $outputBox.Text = "❌ SSH failed or output could not be saved."
     }
-})
 
 # Show the form
 $form.Topmost = $true
