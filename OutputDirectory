@@ -67,6 +67,12 @@ $controls["Switch IP:"].Add_TextChanged({
 
 # Run Button Click Logic
 $button.Add_Click({
+    # Disable controls
+    $button.Text = "Running..."
+    $button.Enabled = $false
+    $form.Cursor = [System.Windows.Forms.Cursors]::WaitCursor
+    $outputBox.Text = ""
+
     $ip = $controls["Switch IP:"].Text.Trim()
     $user = $controls["Username:"].Text.Trim()
     $pass = $controls["Password:"].Text
@@ -74,29 +80,38 @@ $button.Add_Click({
 
     if (-not ($ip -and $user -and $pass -and $outFile)) {
         $outputBox.Text = "⚠️ Please fill in all fields."
+        $button.Text = "Run Show Tech"
+        $button.Enabled = $true
+        $form.Cursor = [System.Windows.Forms.Cursors]::Default
         return
     }
 
     if (-not (Test-Path $plinkPath)) {
         $outputBox.Text = "❌ plink.exe not found at $plinkPath"
+        $button.Text = "Run Show Tech"
+        $button.Enabled = $true
+        $form.Cursor = [System.Windows.Forms.Cursors]::Default
         return
     }
 
     $command = "terminal length 0 && show tech"
 
     try {
-        # Ensure directory exists
         $outputDir = [System.IO.Path]::GetDirectoryName($outFile)
         if (-not (Test-Path $outputDir)) {
             New-Item -Path $outputDir -ItemType Directory | Out-Null
         }
 
-        # Run SSH command and save output
         & $plinkPath -ssh "$user@$ip" -pw $pass $command | Out-File -FilePath $outFile -Encoding utf8
         $outputBox.Text = "✅ Output saved to $outFile"
     } catch {
         $outputBox.Text = "❌ SSH failed or output could not be saved."
     }
+
+    # Re-enable controls
+    $button.Text = "Run Show Tech"
+    $button.Enabled = $true
+    $form.Cursor = [System.Windows.Forms.Cursors]::Default
 })
 
 # Show the Form
